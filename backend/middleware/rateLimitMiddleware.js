@@ -1,7 +1,7 @@
 const rateLimit = require("express-rate-limit");
 
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 5 * 60 * 1000,
     limit: 100,
     standardHeaders: "draft-8",
     legacyHeaders: false,
@@ -12,9 +12,8 @@ const globalLimiter = rateLimit({
     }
 });
 
-
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 5 * 60 * 1000,
     limit: 10,
     standardHeaders: "draft-8",
     legacyHeaders: false,
@@ -24,7 +23,6 @@ const authLimiter = rateLimit({
         message: "Too many authentication attempts. Try again later."
     }
 });
-
 
 module.exports = {
     globalLimiter,
