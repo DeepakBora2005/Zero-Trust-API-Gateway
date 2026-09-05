@@ -7,14 +7,22 @@ import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
 import SecurityEvents from "../components/SecurityEvents";
 
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
 
 const DashBoard = () => {
+
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const [dashboard, setDashboard] = useState(null);
 
     const [events, setEvents] = useState([]);
 
     const [loading, setLoading] = useState(true);
+
+    const [verificationFailed, setVerificationFailed] = useState(false);
 
 
     useEffect(() => {
@@ -43,6 +51,9 @@ const DashBoard = () => {
                     "Dashboard error:",
                     error
                 );
+
+                // Backend verification failed
+                setVerificationFailed(true);
 
             } finally {
 
@@ -84,11 +95,59 @@ const DashBoard = () => {
     }, []);
 
 
+    // Logout function
+    const handleLogout = () => {
+
+        logout();
+
+        navigate("/login");
+
+    };
+
+
     if (loading) {
 
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
                 Loading security dashboard...
+            </div>
+        );
+
+    }
+
+
+    // If backend verification fails
+    if (verificationFailed) {
+
+        return (
+            <div className="min-h-screen bg-slate-950">
+
+                {/* Top Navbar */}
+                <nav className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800">
+
+                    <h1 className="text-xl font-bold text-white">
+                        ZeroTrust
+                    </h1>
+
+                    <button
+                        onClick={handleLogout}
+                        className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg"
+                    >
+                        Logout
+                    </button>
+
+                </nav>
+
+
+                {/* Logged In Message */}
+                <main className="flex items-center justify-center min-h-[calc(100vh-73px)]">
+
+                    <h2 className="text-2xl font-semibold text-white">
+                        User Logged In
+                    </h2>
+
+                </main>
+
             </div>
         );
 
