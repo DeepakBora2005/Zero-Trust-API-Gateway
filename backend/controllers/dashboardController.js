@@ -1,6 +1,11 @@
 const SecurityLog = require("../models/SecurityLog");
 const User = require("../models/User");
 
+const {
+    getBlockedIPs
+} = require("../services/ipBlockService");
+
+
 const getDashboard = async (req, res) => {
 
     try {
@@ -8,7 +13,6 @@ const getDashboard = async (req, res) => {
         const [
             totalRequests,
             totalUsers,
-            blockedRequests,
             criticalThreats,
             highThreats,
             loginAttempts,
@@ -28,17 +32,6 @@ const getDashboard = async (req, res) => {
             // =========================================
 
             User.countDocuments(),
-
-
-            // =========================================
-            // Blocked requests
-            // =========================================
-
-            SecurityLog.countDocuments({
-                status: {
-                    $gte: 400
-                }
-            }),
 
 
             // =========================================
@@ -94,6 +87,13 @@ const getDashboard = async (req, res) => {
 
 
         // =========================================
+        // Currently blocked IP addresses
+        // =========================================
+
+        const blockedIPs = getBlockedIPs();
+
+
+        // =========================================
         // Recent security events
         // =========================================
 
@@ -130,11 +130,18 @@ const getDashboard = async (req, res) => {
 
                     total: totalRequests,
 
-                    blocked: blockedRequests,
+                    allowed: totalRequests
 
-                    allowed:
-                        totalRequests -
-                        blockedRequests
+                },
+
+
+                // -------------------------------
+                // Blocked IP statistics
+                // -------------------------------
+
+                security: {
+
+                    blockedIPs: blockedIPs.length
 
                 },
 
