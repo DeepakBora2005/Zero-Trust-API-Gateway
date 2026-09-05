@@ -82,7 +82,7 @@ const DashBoard = () => {
         }
 
         const socket =
-            io("https://zero-trust-bck.onrender.com/");
+            io("http://13.221.84.69:5000/");
 
 
         socket.on(
