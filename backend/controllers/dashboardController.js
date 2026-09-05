@@ -1,4 +1,5 @@
 const SecurityLog = require("../models/SecurityLog");
+const User = require("../models/User");
 
 const getDashboard = async (req, res) => {
 
@@ -6,14 +7,32 @@ const getDashboard = async (req, res) => {
 
         const [
             totalRequests,
+            totalUsers,
             blockedRequests,
             criticalThreats,
             highThreats,
+            loginAttempts,
             failedLogins,
             successfulLogins
         ] = await Promise.all([
 
+            // =========================================
+            // Total API requests
+            // =========================================
+
             SecurityLog.countDocuments(),
+
+
+            // =========================================
+            // Total registered users
+            // =========================================
+
+            User.countDocuments(),
+
+
+            // =========================================
+            // Blocked requests
+            // =========================================
 
             SecurityLog.countDocuments({
                 status: {
@@ -21,17 +40,51 @@ const getDashboard = async (req, res) => {
                 }
             }),
 
+
+            // =========================================
+            // Critical threats
+            // =========================================
+
             SecurityLog.countDocuments({
                 severity: "CRITICAL"
             }),
+
+
+            // =========================================
+            // High severity threats
+            // =========================================
 
             SecurityLog.countDocuments({
                 severity: "HIGH"
             }),
 
+
+            // =========================================
+            // Total login attempts
+            // =========================================
+
+            SecurityLog.countDocuments({
+                action: {
+                    $in: [
+                        "LOGIN_SUCCESS",
+                        "LOGIN_FAILED"
+                    ]
+                }
+            }),
+
+
+            // =========================================
+            // Failed logins
+            // =========================================
+
             SecurityLog.countDocuments({
                 action: "LOGIN_FAILED"
             }),
+
+
+            // =========================================
+            // Successful logins
+            // =========================================
 
             SecurityLog.countDocuments({
                 action: "LOGIN_SUCCESS"
@@ -40,6 +93,10 @@ const getDashboard = async (req, res) => {
         ]);
 
 
+        // =========================================
+        // Recent security events
+        // =========================================
+
         const recentEvents = await SecurityLog
             .find()
             .sort({
@@ -47,9 +104,17 @@ const getDashboard = async (req, res) => {
             })
             .limit(10)
             .select(
-                "action severity ip endpoint status createdAt"
+                "user action severity ip endpoint method status createdAt"
+            )
+            .populate(
+                "user",
+                "name email"
             );
 
+
+        // =========================================
+        // Dashboard response
+        // =========================================
 
         res.status(200).json({
 
@@ -57,23 +122,65 @@ const getDashboard = async (req, res) => {
 
             dashboard: {
 
+                // -------------------------------
+                // Request statistics
+                // -------------------------------
+
                 requests: {
+
                     total: totalRequests,
+
                     blocked: blockedRequests,
+
                     allowed:
                         totalRequests -
                         blockedRequests
+
                 },
 
-                threats: {
-                    critical: criticalThreats,
-                    high: highThreats
+
+                // -------------------------------
+                // User statistics
+                // -------------------------------
+
+                users: {
+
+                    total: totalUsers
+
                 },
+
+
+                // -------------------------------
+                // Authentication statistics
+                // -------------------------------
 
                 authentication: {
+
+                    loginAttempts,
+
                     failedLogins,
+
                     successfulLogins
+
                 },
+
+
+                // -------------------------------
+                // Threat statistics
+                // -------------------------------
+
+                threats: {
+
+                    critical: criticalThreats,
+
+                    high: highThreats
+
+                },
+
+
+                // -------------------------------
+                // Recent security events
+                // -------------------------------
 
                 recentEvents
 
@@ -83,14 +190,21 @@ const getDashboard = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Dashboard error:",
+            error
+        );
 
         res.status(500).json({
+
             success: false,
+
             message: "Failed to load dashboard"
+
         });
 
     }
+
 };
 
 
