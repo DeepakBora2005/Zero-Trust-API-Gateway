@@ -1,9 +1,9 @@
 const SecurityLog = require("../models/SecurityLog");
 
 const {
-    blockIP
+    blockIP,
+    isIPBlocked
 } = require("../services/ipBlockService");
-
 const createSecurityEvent = require(
     "../services/securityEventService"
 );
@@ -11,7 +11,12 @@ const createSecurityEvent = require(
 const detectThreats = async (req, res, next) => {
 
     const ip = req.ip;
-
+    if (isIPBlocked(ip)) {
+    return res.status(403).json({
+        success: false,
+        message: "Your IP address is temporarily blocked. Try again later."
+    });
+}
     try {
 
         const recentFailures = await SecurityLog.countDocuments({
