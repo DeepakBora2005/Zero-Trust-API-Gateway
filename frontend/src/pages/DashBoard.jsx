@@ -8,7 +8,7 @@ import StatCard from "../components/StatCard";
 import SecurityEvents from "../components/SecurityEvents";
 
 
-const Dashboard = () => {
+const DashBoard = () => {
 
     const [dashboard, setDashboard] = useState(null);
 
@@ -199,4 +199,4 @@ const Dashboard = () => {
 };
 
 
-export default Dashboard;
+export default DashBoard;
