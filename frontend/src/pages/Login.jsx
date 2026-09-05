@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
-
 
 const Login = () => {
 
     const navigate = useNavigate();
-
     const { login } = useAuth();
 
     const [email, setEmail] = useState("");
@@ -16,7 +13,6 @@ const Login = () => {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
 
     const handleSubmit = async (e) => {
 
@@ -35,8 +31,10 @@ const Login = () => {
                 }
             );
 
+            // Store the logged-in user
             login(response.data);
 
+            // Redirect to Dashboard.jsx after successful login
             navigate("/dashboard");
 
         } catch (error) {
@@ -52,7 +50,6 @@ const Login = () => {
 
         }
     };
-
 
     return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
@@ -71,7 +68,6 @@ const Login = () => {
 
                 </div>
 
-
                 <form
                     onSubmit={handleSubmit}
                     className="bg-slate-900 border border-slate-800 rounded-xl p-8"
@@ -81,13 +77,11 @@ const Login = () => {
                         Security Console
                     </h2>
 
-
                     {error && (
                         <div className="bg-red-950 border border-red-800 text-red-300 p-3 rounded-lg mb-4">
                             {error}
                         </div>
                     )}
-
 
                     <div className="mb-4">
 
@@ -98,15 +92,12 @@ const Login = () => {
                         <input
                             type="email"
                             value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
-                            }
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500"
                             required
                         />
 
                     </div>
-
 
                     <div className="mb-6">
 
@@ -117,15 +108,12 @@ const Login = () => {
                         <input
                             type="password"
                             value={password}
-                            onChange={(e) =>
-                                setPassword(e.target.value)
-                            }
+                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white outline-none focus:border-blue-500"
                             required
                         />
 
                     </div>
-
 
                     <button
                         type="submit"
@@ -136,18 +124,20 @@ const Login = () => {
                             ? "Authenticating..."
                             : "Sign In"}
                     </button>
-                            <p className="text-center text-sm text-slate-500 mt-6">
 
-    Don't have an account?{" "}
+                    <p className="text-center text-sm text-slate-500 mt-6">
 
-    <Link
-        to="/register"
-        className="text-blue-400 hover:text-blue-300"
-    >
-        Create account
-    </Link>
+                        Don't have an account?{" "}
 
-</p>
+                        <Link
+                            to="/register"
+                            className="text-blue-400 hover:text-blue-300"
+                        >
+                            Create account
+                        </Link>
+
+                    </p>
+
                 </form>
 
             </div>
@@ -155,6 +145,5 @@ const Login = () => {
         </div>
     );
 };
-
 
 export default Login;
