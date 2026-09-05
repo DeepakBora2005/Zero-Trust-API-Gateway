@@ -31,11 +31,13 @@ const Login = () => {
                 }
             );
 
-            // Store the logged-in user
-            login(response.data);
+            console.log("LOGIN SUCCESS:", response.data);
 
-            // Redirect to Dashboard.jsx after successful login
-            navigate("/dashboard");
+login(response.data);
+
+console.log("Navigating to dashboard...");
+
+navigate("/dashboard");
 
         } catch (error) {
 
