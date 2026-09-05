@@ -317,12 +317,12 @@ const DashBoard = () => {
                     />
 
 
-                    <StatCard
-                        title="Blocked"
-                        value={
-                            dashboard.requests.blocked
-                        }
-                    />
+<StatCard
+    title="Blocked IPs"
+    value={
+        dashboard.security.blockedIPs
+    }
+/>
 
 
                     <StatCard
