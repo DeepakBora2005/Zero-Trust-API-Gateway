@@ -1,4 +1,3 @@
-```jsx
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -288,4 +287,3 @@ const DashBoard = () => {
 
 
 export default DashBoard;
-```
