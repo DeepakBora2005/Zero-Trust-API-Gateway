@@ -6,8 +6,8 @@ import {
 } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import Dashboard from "./pages/DashBoard";
-
+import DashBoard from "./pages/DashBoard";
+import Dashboard from "./pages/Dashboard";
 import { useAuth } from "./context/AuthContext";
 
 
@@ -43,12 +43,12 @@ const App = () => {
         path="/register"
         element={<Register />}
     />
-
+    <Route path="/dash" element={<Dashboard />} />
     <Route
         path="/dashboard"
         element={
             <ProtectedRoute>
-                <Dashboard />
+                <DashBoard />
             </ProtectedRoute>
         }
     />
