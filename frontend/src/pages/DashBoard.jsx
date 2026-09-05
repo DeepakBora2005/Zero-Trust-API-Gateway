@@ -20,7 +20,6 @@ const DashBoard = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // This controls whether we show the normal admin dashboard
     const [isAdmin, setIsAdmin] = useState(true);
 
 
@@ -48,7 +47,6 @@ const DashBoard = () => {
                     data.recentEvents || []
                 );
 
-                // Backend verification succeeded
                 setIsAdmin(true);
 
             } catch (error) {
@@ -58,7 +56,6 @@ const DashBoard = () => {
                     error
                 );
 
-                // Backend verification failed
                 setIsAdmin(false);
 
             } finally {
@@ -142,8 +139,6 @@ const DashBoard = () => {
         return (
             <div className="min-h-screen bg-slate-950">
 
-                {/* Top bar */}
-
                 <nav className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800">
 
                     <h1 className="text-xl font-bold text-white">
@@ -160,8 +155,6 @@ const DashBoard = () => {
 
                 </nav>
 
-
-                {/* User logged in */}
 
                 <main className="flex items-center justify-center min-h-[calc(100vh-73px)]">
 
@@ -215,7 +208,9 @@ const DashBoard = () => {
                 </div>
 
 
-                {/* Statistics */}
+                {/* ================================
+                    REQUEST STATISTICS
+                ================================= */}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
@@ -250,9 +245,26 @@ const DashBoard = () => {
                 </div>
 
 
-                {/* Authentication */}
+                {/* ================================
+                    USER STATISTICS
+                ================================= */}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+                    <StatCard
+                        title="Total Users"
+                        value={
+                            dashboard.users.total
+                        }
+                    />
+
+                    <StatCard
+                        title="Login Attempts"
+                        value={
+                            dashboard.authentication
+                                .loginAttempts
+                        }
+                    />
 
                     <StatCard
                         title="Successful Logins"
@@ -273,7 +285,32 @@ const DashBoard = () => {
                 </div>
 
 
-                {/* Events */}
+                {/* ================================
+                    THREAT STATISTICS
+                ================================= */}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+
+                    <StatCard
+                        title="Critical Threats"
+                        value={
+                            dashboard.threats.critical
+                        }
+                    />
+
+                    <StatCard
+                        title="High Threats"
+                        value={
+                            dashboard.threats.high
+                        }
+                    />
+
+                </div>
+
+
+                {/* ================================
+                    SECURITY EVENTS
+                ================================= */}
 
                 <SecurityEvents
                     events={events}
