@@ -14,72 +14,106 @@ import { useAuth } from "../context/AuthContext";
 const DashBoard = () => {
 
     const navigate = useNavigate();
-    const { logout } = useAuth();
+
+    const {
+        user,
+        logout
+    } = useAuth();
+
 
     const [dashboard, setDashboard] = useState(null);
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [isAdmin, setIsAdmin] = useState(true);
 
+    // ========================================
+    // ROLE
+    // ========================================
+
+    const isAdmin =
+        user?.role === "ADMIN";
+
+
+    // ========================================
+    // LOAD ADMIN DASHBOARD
+    // ========================================
 
     useEffect(() => {
+
+        if (!isAdmin) {
+
+            setLoading(false);
+
+            return;
+
+        }
+
 
         const loadDashboard = async () => {
 
             try {
 
-                const response = await api.get(
-                    "/admin/dashboard"
-                );
+                const response =
+                    await api.get(
+                        "/admin/dashboard"
+                    );
+
 
                 console.log(
                     "Admin dashboard response:",
                     response.data
                 );
 
+
                 const data =
                     response.data.dashboard;
 
+
                 setDashboard(data);
+
 
                 setEvents(
                     data.recentEvents || []
                 );
 
-                setIsAdmin(true);
 
             } catch (error) {
 
                 console.error(
-                    "Admin verification failed:",
+                    "Dashboard data loading failed:",
                     error
                 );
-
-                setIsAdmin(false);
 
             } finally {
 
                 setLoading(false);
 
             }
+
         };
 
 
         loadDashboard();
 
-    }, []);
+    }, [isAdmin]);
 
 
-    // Connect socket ONLY for admins
+    // ========================================
+    // SOCKET
+    // ADMIN ONLY
+    // ========================================
+
     useEffect(() => {
 
-        if (!isAdmin || loading) {
+        if (!isAdmin) {
             return;
         }
 
+
         const socket =
-            io("https://zero-trust-api-gateway.onrender.com/");
+            io(
+                "https://zero-trust-api-gateway.onrender.com/"
+            );
 
 
         socket.on(
@@ -104,8 +138,12 @@ const DashBoard = () => {
 
         };
 
-    }, [isAdmin, loading]);
+    }, [isAdmin]);
 
+
+    // ========================================
+    // LOGOUT
+    // ========================================
 
     const handleLogout = () => {
 
@@ -116,7 +154,10 @@ const DashBoard = () => {
     };
 
 
-    // Loading
+    // ========================================
+    // LOADING ADMIN DASHBOARD
+    // ========================================
+
     if (loading) {
 
         return (
@@ -130,9 +171,9 @@ const DashBoard = () => {
     }
 
 
-    // ================================
-    // NON-ADMIN USER
-    // ================================
+    // ========================================
+    // NORMAL USER DASHBOARD
+    // ========================================
 
     if (!isAdmin) {
 
@@ -146,21 +187,40 @@ const DashBoard = () => {
                     </h1>
 
 
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg"
-                    >
-                        Logout
-                    </button>
+                    <div className="flex items-center gap-6">
+
+                        <span className="text-slate-400">
+                            {user?.role || "USER"}
+                        </span>
+
+
+                        <button
+                            onClick={handleLogout}
+                            className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg"
+                        >
+                            Logout
+                        </button>
+
+                    </div>
 
                 </nav>
 
 
-                <main className="flex items-center justify-center min-h-[calc(100vh-73px)]">
+                <main className="flex flex-col items-center justify-center min-h-[calc(100vh-73px)]">
 
                     <h2 className="text-3xl font-bold text-white">
-                        User Logged In
+                        User Dashboard
                     </h2>
+
+
+                    <p className="text-slate-500 mt-3">
+                        Welcome, {user?.name || "User"}
+                    </p>
+
+
+                    <p className="text-slate-600 mt-1">
+                        You are logged in as a regular user.
+                    </p>
 
                 </main>
 
@@ -170,22 +230,48 @@ const DashBoard = () => {
     }
 
 
-    // ================================
-    // ADMIN DASHBOARD
-    // ================================
+    // ========================================
+    // ADMIN DATA FAILED
+    // ========================================
 
     if (!dashboard) {
 
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center text-red-400">
+            <div className="min-h-screen bg-slate-950">
 
-                Failed to load dashboard.
+                <Navbar />
+
+
+                <main className="flex flex-col items-center justify-center min-h-[calc(100vh-73px)]">
+
+                    <h2 className="text-2xl font-bold text-red-400">
+                        Failed to load dashboard data
+                    </h2>
+
+
+                    <p className="text-slate-500 mt-2">
+                        Your admin role is valid, but the dashboard API could not be loaded.
+                    </p>
+
+
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-6 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg"
+                    >
+                        Retry
+                    </button>
+
+                </main>
 
             </div>
         );
 
     }
 
+
+    // ========================================
+    // ADMIN DASHBOARD
+    // ========================================
 
     return (
         <div className="min-h-screen bg-slate-950">
@@ -201,6 +287,7 @@ const DashBoard = () => {
                         Security Dashboard
                     </h2>
 
+
                     <p className="text-slate-500 mt-1">
                         Real-time API security monitoring
                     </p>
@@ -208,9 +295,9 @@ const DashBoard = () => {
                 </div>
 
 
-                {/* ================================
+                {/* ========================================
                     REQUEST STATISTICS
-                ================================= */}
+                ======================================== */}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
@@ -221,6 +308,7 @@ const DashBoard = () => {
                         }
                     />
 
+
                     <StatCard
                         title="Allowed"
                         value={
@@ -228,12 +316,14 @@ const DashBoard = () => {
                         }
                     />
 
+
                     <StatCard
                         title="Blocked"
                         value={
                             dashboard.requests.blocked
                         }
                     />
+
 
                     <StatCard
                         title="Critical Threats"
@@ -245,9 +335,9 @@ const DashBoard = () => {
                 </div>
 
 
-                {/* ================================
-                    USER STATISTICS
-                ================================= */}
+                {/* ========================================
+                    AUTHENTICATION STATISTICS
+                ======================================== */}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
@@ -258,6 +348,7 @@ const DashBoard = () => {
                         }
                     />
 
+
                     <StatCard
                         title="Login Attempts"
                         value={
@@ -266,6 +357,7 @@ const DashBoard = () => {
                         }
                     />
 
+
                     <StatCard
                         title="Successful Logins"
                         value={
@@ -273,6 +365,7 @@ const DashBoard = () => {
                                 .successfulLogins
                         }
                     />
+
 
                     <StatCard
                         title="Failed Logins"
@@ -285,18 +378,11 @@ const DashBoard = () => {
                 </div>
 
 
-                {/* ================================
+                {/* ========================================
                     THREAT STATISTICS
-                ================================= */}
+                ======================================== */}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-
-                    <StatCard
-                        title="Critical Threats"
-                        value={
-                            dashboard.threats.critical
-                        }
-                    />
 
                     <StatCard
                         title="High Threats"
@@ -305,12 +391,20 @@ const DashBoard = () => {
                         }
                     />
 
+
+                    <StatCard
+                        title="Critical Threats"
+                        value={
+                            dashboard.threats.critical
+                        }
+                    />
+
                 </div>
 
 
-                {/* ================================
+                {/* ========================================
                     SECURITY EVENTS
-                ================================= */}
+                ======================================== */}
 
                 <SecurityEvents
                     events={events}
