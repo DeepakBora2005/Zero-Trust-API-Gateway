@@ -79,7 +79,7 @@ const DashBoard = () => {
         }
 
         const socket =
-            io("http://13.221.84.69:5000/");
+            io("https://zero-trust-api-gateway.onrender.com/");
 
 
         socket.on(
