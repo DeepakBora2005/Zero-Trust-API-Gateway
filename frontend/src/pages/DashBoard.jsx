@@ -1,3 +1,4 @@
+```jsx
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -17,12 +18,11 @@ const DashBoard = () => {
     const { logout } = useAuth();
 
     const [dashboard, setDashboard] = useState(null);
-
     const [events, setEvents] = useState([]);
-
     const [loading, setLoading] = useState(true);
 
-    const [verificationFailed, setVerificationFailed] = useState(false);
+    // This controls whether we show the normal admin dashboard
+    const [isAdmin, setIsAdmin] = useState(true);
 
 
     useEffect(() => {
@@ -31,10 +31,14 @@ const DashBoard = () => {
 
             try {
 
-                const response =
-                    await api.get(
-                        "/admin/dashboard"
-                    );
+                const response = await api.get(
+                    "/admin/dashboard"
+                );
+
+                console.log(
+                    "Admin dashboard response:",
+                    response.data
+                );
 
                 const data =
                     response.data.dashboard;
@@ -45,15 +49,18 @@ const DashBoard = () => {
                     data.recentEvents || []
                 );
 
+                // Backend verification succeeded
+                setIsAdmin(true);
+
             } catch (error) {
 
                 console.error(
-                    "Dashboard error:",
+                    "Admin verification failed:",
                     error
                 );
 
                 // Backend verification failed
-                setVerificationFailed(true);
+                setIsAdmin(false);
 
             } finally {
 
@@ -65,6 +72,15 @@ const DashBoard = () => {
 
         loadDashboard();
 
+    }, []);
+
+
+    // Connect socket ONLY for admins
+    useEffect(() => {
+
+        if (!isAdmin || loading) {
+            return;
+        }
 
         const socket =
             io("https://zero-trust-bck.onrender.com/");
@@ -92,10 +108,9 @@ const DashBoard = () => {
 
         };
 
-    }, []);
+    }, [isAdmin, loading]);
 
 
-    // Logout function
     const handleLogout = () => {
 
         logout();
@@ -105,29 +120,37 @@ const DashBoard = () => {
     };
 
 
+    // Loading
     if (loading) {
 
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+
                 Loading security dashboard...
+
             </div>
         );
 
     }
 
 
-    // If backend verification fails
-    if (verificationFailed) {
+    // ================================
+    // NON-ADMIN USER
+    // ================================
+
+    if (!isAdmin) {
 
         return (
             <div className="min-h-screen bg-slate-950">
 
-                {/* Top Navbar */}
+                {/* Top bar */}
+
                 <nav className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800">
 
                     <h1 className="text-xl font-bold text-white">
                         ZeroTrust
                     </h1>
+
 
                     <button
                         onClick={handleLogout}
@@ -139,10 +162,11 @@ const DashBoard = () => {
                 </nav>
 
 
-                {/* Logged In Message */}
+                {/* User logged in */}
+
                 <main className="flex items-center justify-center min-h-[calc(100vh-73px)]">
 
-                    <h2 className="text-2xl font-semibold text-white">
+                    <h2 className="text-3xl font-bold text-white">
                         User Logged In
                     </h2>
 
@@ -154,11 +178,17 @@ const DashBoard = () => {
     }
 
 
+    // ================================
+    // ADMIN DASHBOARD
+    // ================================
+
     if (!dashboard) {
 
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center text-red-400">
+
                 Failed to load dashboard.
+
             </div>
         );
 
@@ -172,7 +202,6 @@ const DashBoard = () => {
 
 
             <main className="max-w-7xl mx-auto px-6 py-8">
-
 
                 <div className="mb-8">
 
@@ -259,3 +288,4 @@ const DashBoard = () => {
 
 
 export default DashBoard;
+```
